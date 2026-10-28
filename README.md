@@ -1,26 +1,24 @@
-# family-template
+# world-bank
 
-Start a new scraping family for the s1d-labs pool. A family is one kind of site (or one platform many sites share); the pool runs
-its code on members' GitHub Actions minutes. This template is a complete, working family for
-[books.toscrape.com](https://books.toscrape.com) (a public site made for scraping practice): copy it, then change it.
+s1d-labs scrape pool family: **World Bank contract awards for India projects** (job P18).
 
-## Make your family
+| | |
+|---|---|
+| Source | [Finances One: Contract Awards in Investment Project Financing (Since FY 2020)](https://financesone.worldbank.org/contract-awards-in-investment-project-financing/DS00005), dataset DS00005 (the old finances.worldbank.org "Major Contract Awards", `kdui-wcs3`; that site now redirects here) |
+| API | `https://datacatalogapi.worldbank.org/dexapps/fone/api/apiservice?datasetId=DS00005&resourceId=RS00005&type=json&top=1000&skip=N&filter=borrower_country_code='IN' and fiscal_year=YYYY` (public, no key, 1000 rows max per call) |
+| Project | `world-bank-contracts-india`: one queue item per World Bank fiscal year (FY2020 to the current one, July to June) |
+| Record | one per contract and supplier, id `<wb_contract_number>-<supplier_id>` (joint ventures have several suppliers per contract): project, contract, supplier, amount (USD), procurement method/category, dates, review type |
+| Files | each raw API response, gzipped, at `world-bank-contracts-india/api/fy<YYYY>/skip-<N>.json.gz` |
+| Size | about 35,000 rows from about 40 requests (2026-10) |
 
-1. Ask the hub owner to **add the family** on [scrape.s1d.me/runners](https://scrape.s1d.me/runners) (name, what it scrapes, owner).
-   The hub creates `s1d-labs/<family>` from this template, names the family in `scrape.json`, and makes the owner admin
-   (with the GitHub account they added on home.s1d.me).
-2. Clone it: `gh repo clone s1d-labs/<family>`.
-3. In your repo:
-   - `scrape.json`: set `"family"` to the family name; list your tasks (one command each) and setup steps.
-   - `family.py`: your projects (one queue of work per site), their target hosts, the env your command needs, the queue items,
-     and the health checks.
-   - `crawl.py` (or whatever your tasks run): the scraper.
-4. **Check it**: `scrape-check` in the repo (needs `pip install "scrape-hub-client @ git+https://github.com/s1d-labs/runner@main#subdirectory=sdk"`).
-   It runs your setup and task against a local stand-in hub on 3 real items and says what works. The **check** workflow runs it
-   (and `tests/`) on every push.
-5. Run the **setup** workflow (Actions → setup → Run workflow). It registers the projects, puts them in the pool and registers
-   the health checks.
-6. The hub starts runs in members' accounts when the pool is on and there is work. Watch it on scrape.s1d.me.
+An item counts as done only when the rows received match the API's `count` for that year. If they don't (for example, rows added
+while paging), the item fails and the hub retries it. Re-running setup adds a new fiscal year when one starts. Years already done are
+not fetched again unless they are re-queued.
+
+Not covered: awards from FY2001 to FY2016 (dataset DS01004, prior review only). That dataset has no supplier ids, so it would need a
+different record id.
+
+Try one page without the hub: `python crawl.py --local 2024`. Tests: `python -m pytest tests`. Full check: `scrape-check`.
 
 ## What your code gets
 

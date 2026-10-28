@@ -1,6 +1,6 @@
 {
   "family": "world-bank",
-  "about": "Example family: books.toscrape.com (a public site made for scraping practice). Copy this repo and change it.",
+  "about": "World Bank contract awards in Investment Project Financing (Finances One DS00005, formerly Major Contract Awards), India projects.",
   "setup": [
     "pip install -r requirements.txt"
   ],
