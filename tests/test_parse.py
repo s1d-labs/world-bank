@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import crawl
+import debarred
 import family
 
 PAGES = Path(__file__).parent / "pages"
@@ -34,3 +35,19 @@ def test_fiscal_year_runs_july_to_june():
     import datetime
     assert family.current_fy(datetime.date(2026, 6, 30)) == 2026
     assert family.current_fy(datetime.date(2026, 7, 1)) == 2027
+
+
+def test_debarred_parse_gives_one_record_per_party():
+    text = (PAGES / "debarred-sanctioned-firm.json").read_text(encoding="utf-8")
+    _, rows = debarred.parse(text)
+    assert len(rows) == 25
+    ids = {rid for rid, _ in rows}
+    assert len(ids) == 25                                            # SUPP_ID is a stable, unique key
+    by_id = dict(rows)
+    f = by_id["306951"]
+    assert f["name"] == "L’ENTREPRISE GÉNÉRALE DE CONSTRUCTION ERLINE"
+    assert f["country"] == "Madagascar" and f["country_code"] == "MG"
+    assert f["from_date"] == "2014-05-28"
+    assert f["to_date"] is None and f["ongoing"] is True            # the site's 2999-12-31 end becomes null + ongoing
+    assert "Procurement Guidelines" in f["grounds"]
+    assert all(r["name"] for _, r in rows)                           # every party has a name

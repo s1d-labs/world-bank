@@ -43,3 +43,13 @@ nothing left; the worker then asks the hub for the next assignment.
 - **Files go through the hub** (`hub.upload_many`): it signs each upload into the family's bucket (500 GB per member) and stops at
   the cap. Never put storage keys in this repo.
 - **Public data only**; read the site's terms first. See the team docs on home.s1d.me (Scraping rules).
+
+## Debarred firms (project `world-bank-debarred`, task `debarred`)
+
+The World Bank's public "Listing of Ineligible (Debarred & Cross-Debarred) Firms and Individuals"
+(worldbank.org/en/projects-operations/procurement/debarred-firms). The page draws the list in the browser from the Bank's
+public gateway, so `debarred.py` opens that public page headlessly (Chromium via Playwright; the `setup` installs it) and keeps
+the one data response the page requests (`.../FIRM/SANCTIONED_FIRM`, under `response.ZPROCSUPP`) — it sends no key of its own.
+One record per party: `name`, `type` (firm/individual), `country`, `city`, `address`, `from_date` / `to_date` (the site's
+`2999-12-31` end becomes `ongoing: true`), `grounds`, `cross_debarred`, `supp_id` (the stable id). Runs on GitHub runners
+(global site, no geo). Try it: `python debarred.py --local`.

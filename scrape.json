@@ -1,13 +1,12 @@
 {
   "family": "world-bank",
-  "about": "World Bank contract awards in Investment Project Financing (Finances One DS00005, formerly Major Contract Awards), India projects.",
+  "about": "World Bank contract awards in Investment Project Financing (Finances One DS00005), India projects; and the World Bank's public listing of debarred / cross-debarred (ineligible) firms and individuals.",
   "setup": [
-    "pip install -r requirements.txt"
+    "pip install -r requirements.txt",
+    "python -m playwright install --with-deps chromium"
   ],
   "tasks": {
-    "crawl": [
-      "python",
-      "crawl.py"
-    ]
+    "crawl": ["python", "crawl.py"],
+    "debarred": ["python", "debarred.py"]
   }
 }

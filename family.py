@@ -41,8 +41,24 @@ PROJECTS = [
         "items": [{"key": f"fy{fy}", "payload": {"fiscal_year": fy, "expected": EXPECTED.get(fy, 3000)}}
                   for fy in range(FIRST_FY, current_fy() + 1)],
     },
+    {
+        # The Bank's public "Listing of Ineligible (Debarred & Cross-Debarred) Firms and Individuals". One page, rendered
+        # headlessly by the `debarred` task (needs Chromium; see scrape.json setup). Global site, so GitHub runners (no geo).
+        "name": f"{FAMILY}-debarred",
+        "title": "World Bank debarred / cross-debarred firms and individuals",
+        "task": "debarred",
+        "target": "www.worldbank.org",
+        "env": {},
+        "probe": f"{FAMILY}:debarred-page",
+        "max_workers": 1,                        # one page; one worker
+        "geo": "",
+        "unit_label": "listing", "record_label": "debarred party",
+        "items": [{"key": "debarred", "payload": {"expected": 1500}}],
+    },
 ]
 
 # health checks the hub runs every minute; work for a project holds while its probe fails
 PROBES = [{"name": f"{FAMILY}:datacatalogapi.worldbank.org", "url": f"{API}?datasetId=DS00005&resourceId=RS00005&type=json&top=1",
-           "expect": "wb_contract_number"}]
+           "expect": "wb_contract_number"},
+          {"name": f"{FAMILY}:debarred-page",
+           "url": "https://www.worldbank.org/en/projects-operations/procurement/debarred-firms", "expect": "Ineligible"}]
